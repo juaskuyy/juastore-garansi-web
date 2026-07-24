@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "juastore-garansi-worker",
+  "name": "juastore-garansi-web",
   "main": "worker.js",
-  "compatibility_date": "2026-07-25",
+  "compatibility_date": "2025-12-31",
   "workers_dev": true,
   "d1_databases": [
     {
