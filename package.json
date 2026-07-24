@@ -1,7 +1,13 @@
 {
-  "name": "juastore-garansi-web",
-  "version": "2.0.0",
+  "name": "juastore-garansi-worker",
+  "version": "3.0.0",
   "private": true,
-  "scripts": {"deploy": "wrangler deploy"},
-  "devDependencies": {"wrangler": "^4.0.0"}
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:remote": "wrangler d1 execute juastore-garansi --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
 }
