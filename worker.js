@@ -1,0 +1,104 @@
+const HTML = `<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17191d" />
+  <meta name="description" content="Form pengajuan garansi dan refund resmi JuaStore." />
+  <title>JuaStore — Garansi & Refund</title>
+  <style>
+    :root{--bg:#0f1115;--card:#171a20;--line:#2a3039;--text:#f4f6f8;--muted:#a9b0ba;--accent:#d8dde4;--ok:#37c978;--bad:#ef6262;--shadow:0 18px 45px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at top,#242933 0,#12151a 34%,#0d0f13 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}button,input,select,textarea{font:inherit}.wrap{width:min(920px,calc(100% - 28px));margin:auto;padding:26px 0 44px}.hero{display:flex;gap:16px;align-items:center;padding:20px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-radius:24px;box-shadow:var(--shadow)}.logo{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:#d9dde3;color:#13161a;font-weight:900;font-size:22px;flex:0 0 auto}h1{font-size:clamp(23px,5vw,34px);line-height:1.08;margin:0 0 7px}.sub{margin:0;color:var(--muted);font-size:14px;line-height:1.55}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px;margin:18px 0;background:#11141a;border:1px solid var(--line);border-radius:16px;position:sticky;top:8px;z-index:5}.tab{border:0;border-radius:11px;padding:12px 10px;background:transparent;color:var(--muted);font-weight:800;cursor:pointer}.tab.active{background:var(--accent);color:#111318}.panel{display:none}.panel.active{display:block}.card{background:rgba(23,26,32,.96);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow)}.card h2{font-size:20px;margin:0 0 5px}.hint{color:var(--muted);font-size:13px;margin:0 0 18px;line-height:1.5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:750;color:#dce0e6;margin:0 0 7px}.req{color:#ff8585}input,select,textarea{width:100%;border:1px solid #343b46;background:#11141a;color:var(--text);border-radius:12px;padding:13px 14px;outline:none}textarea{min-height:120px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#8f98a6;box-shadow:0 0 0 3px rgba(216,221,228,.09)}input[type=file]{padding:10px}.small{font-size:12px;color:var(--muted);margin-top:6px}.btn{width:100%;border:0;border-radius:13px;background:var(--accent);color:#111318;padding:14px 18px;font-weight:900;cursor:pointer;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:8px}.btn:disabled{opacity:.6;cursor:not-allowed}.notice{display:none;margin-top:15px;border-radius:13px;padding:13px 14px;font-size:14px;line-height:1.5;white-space:pre-line;border:1px solid}.notice.show{display:block}.notice.ok{background:rgba(55,201,120,.1);border-color:rgba(55,201,120,.45);color:#bff4d5}.notice.err{background:rgba(239,98,98,.1);border-color:rgba(239,98,98,.45);color:#ffd0d0}.status-list{display:grid;gap:12px;margin-top:16px}.status-item{border:1px solid var(--line);background:#12151a;border-radius:15px;padding:15px}.status-head{display:flex;justify-content:space-between;gap:10px}.status-id{font-weight:900;font-size:14px;word-break:break-all}.badge{padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900;white-space:nowrap;background:#353b45}.badge.wait{color:#ffe3a3;background:rgba(240,184,75,.14)}.badge.ok{color:#baf2d1;background:rgba(55,201,120,.14)}.badge.bad{color:#ffc6c6;background:rgba(239,98,98,.14)}.meta{display:grid;gap:6px;margin-top:12px;color:#c8cdd4;font-size:13px}.meta b{color:#fff}.empty{text-align:center;color:var(--muted);padding:28px 10px}.footer{text-align:center;color:#7f8792;font-size:12px;padding:22px 0 4px}.spinner{width:17px;height:17px;border:2px solid rgba(0,0,0,.25);border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:680px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.wrap{width:min(100% - 20px,920px);padding-top:12px}.card{padding:16px;border-radius:18px}.tabs{top:6px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero"><div class="logo">JS</div><div><h1>Garansi & Refund JuaStore</h1><p class="sub">Ajukan kendala pembelian dan cek prosesnya secara mandiri. Pastikan data order yang dimasukkan benar.</p></div></section>
+    <nav class="tabs"><button class="tab active" type="button" data-target="claimPanel">Ajukan Klaim</button><button class="tab" type="button" data-target="statusPanel">Cek Status</button></nav>
+    <section id="claimPanel" class="panel active"><div class="card"><h2>Form Pengajuan</h2><p class="hint">Kolom bertanda <span class="req">*</span> wajib diisi. Bukti order/login sangat membantu proses verifikasi.</p>
+      <form id="claimForm" enctype="multipart/form-data" novalidate><div class="grid">
+        <div><label for="customerName">Nama pelanggan <span class="req">*</span></label><input id="customerName" name="customerName" autocomplete="name" required placeholder="Nama lengkap" /></div>
+        <div><label for="customerContact">Nomor WhatsApp <span class="req">*</span></label><input id="customerContact" name="customerContact" inputmode="tel" autocomplete="tel" required placeholder="08xxxxxxxxxx" /></div>
+        <div><label for="productName">Nama produk <span class="req">*</span></label><input id="productName" name="productName" required placeholder="Contoh: Netflix 1P1U" /></div>
+        <div><label for="price">Harga pembelian</label><input id="price" name="price" inputmode="numeric" placeholder="Contoh: 25000" /></div>
+        <div><label for="duration">Durasi</label><input id="duration" name="duration" placeholder="Contoh: 1 bulan" /></div>
+        <div><label for="orderDate">Tanggal order</label><input id="orderDate" name="orderDate" type="date" /></div>
+        <div><label for="orderId">ID order <span class="req">*</span></label><input id="orderId" name="orderId" required placeholder="Contoh: JS-20260724-001" /></div>
+        <div><label for="payment">Metode pembayaran</label><select id="payment" name="payment"><option value="">Pilih metode</option><option>DANA</option><option>GoPay</option><option>QRIS</option><option>Transfer Bank</option><option>Lainnya</option></select></div>
+        <div class="full"><label for="claimType">Jenis pengajuan</label><select id="claimType" name="claimType"><option value="Garansi">Garansi</option><option value="Refund">Refund</option></select></div>
+        <div class="full"><label for="problem">Masalah / kendala <span class="req">*</span></label><textarea id="problem" name="problem" required placeholder="Jelaskan kendala dengan jelas, termasuk sejak kapan masalah terjadi."></textarea></div>
+        <div class="full"><label for="evidence">Bukti screenshot</label><input id="evidence" name="evidence" type="file" accept="image/jpeg,image/png,image/webp" /><div class="small">Format JPG, PNG, atau WEBP. Maksimal 5 MB.</div></div>
+      </div><button id="submitBtn" class="btn" type="submit">Kirim Pengajuan</button><div id="claimNotice" class="notice" role="alert"></div></form>
+    </div></section>
+    <section id="statusPanel" class="panel"><div class="card"><h2>Cek Status Klaim</h2><p class="hint">Masukkan ID garansi atau nomor WhatsApp yang dipakai saat pengajuan.</p><form id="statusForm"><label for="statusQuery">ID garansi / WhatsApp</label><input id="statusQuery" required placeholder="GRN-... atau 08xxxxxxxxxx" /><button id="statusBtn" class="btn" type="submit">Cari Status</button></form><div id="statusNotice" class="notice"></div><div id="statusResults" class="status-list"></div></div></section>
+    <div class="footer">© 2026 JuaStore • Apps • Games • Hosting • Web v2.0</div>
+  </main>
+<script>
+const API_BASE='https://juastore-garansi-worker.jhonyoga01.workers.dev';
+const byId=id=>document.getElementById(id);
+const claimForm=byId('claimForm');
+const statusForm=byId('statusForm');
+const claimNotice=byId('claimNotice');
+const statusNotice=byId('statusNotice');
+const statusResults=byId('statusResults');
+
+document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));tab.classList.add('active');const panel=byId(tab.dataset.target);if(panel)panel.classList.add('active')}));
+function notice(el,message,ok=false){if(!el)return;el.textContent=message;el.className=\`notice show \${ok?'ok':'err'}\`}
+function clear(el){if(!el)return;el.textContent='';el.className='notice'}
+function loading(btn,on,label){if(!btn)return;btn.disabled=on;btn.innerHTML=on?'<span class="spinner"></span> Memproses...':label}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+claimForm.addEventListener('submit',async event=>{
+  event.preventDefault();clear(claimNotice);
+  if(!claimForm.reportValidity())return;
+  const file=byId('evidence').files[0];
+  if(file&&file.size>5*1024*1024){notice(claimNotice,'Screenshot maksimal 5 MB.');return}
+  const button=byId('submitBtn');loading(button,true,'Kirim Pengajuan');
+  try{
+    const response=await fetch(\`\${API_BASE}/api/claims\`,{method:'POST',body:new FormData(claimForm)});
+    const raw=await response.text();let data;
+    try{data=JSON.parse(raw)}catch{throw new Error(\`Respons server tidak valid: \${raw.slice(0,160)}\`)}
+    if(!response.ok||!data.success)throw new Error(data.message||'Pengajuan gagal dikirim.');
+    notice(claimNotice,\`✅ Pengajuan berhasil.\\nID Garansi: \${data.claimId}\\nSimpan ID tersebut untuk cek status.\`,true);
+    /* Sengaja tidak memakai form.reset() agar tidak muncul error reset pada browser/deploy lama. */
+    byId('problem').value='';
+    byId('evidence').value='';
+    claimNotice.scrollIntoView({behavior:'smooth',block:'center'});
+  }catch(error){notice(claimNotice,error?.message||'Tidak dapat terhubung ke server.')}
+  finally{loading(button,false,'Kirim Pengajuan')}
+});
+
+statusForm.addEventListener('submit',async event=>{
+  event.preventDefault();clear(statusNotice);statusResults.innerHTML='';
+  const q=byId('statusQuery').value.trim();if(!q)return;
+  const button=byId('statusBtn');loading(button,true,'Cari Status');
+  try{
+    const response=await fetch(\`\${API_BASE}/api/status?q=\${encodeURIComponent(q)}\`);
+    const raw=await response.text();let data;
+    try{data=JSON.parse(raw)}catch{throw new Error(\`Respons server tidak valid: \${raw.slice(0,160)}\`)}
+    if(!response.ok||!data.success)throw new Error(data.message||'Status tidak dapat dimuat.');
+    if(!data.data?.length){statusResults.innerHTML='<div class="empty">Data klaim tidak ditemukan.</div>';return}
+    statusResults.innerHTML=data.data.map(item=>{const s=String(item.status||'Menunggu');const cls=s==='Ditolak'?'bad':(s==='Diterima'||s==='Diproses'?'ok':'wait');return \`<article class="status-item"><div class="status-head"><div class="status-id">\${esc(item.id)}</div><span class="badge \${cls}">\${esc(s)}</span></div><div class="meta"><div><b>Produk:</b> \${esc(item.product_name||'-')}</div><div><b>ID Order:</b> \${esc(item.order_id||'-')}</div><div><b>Jenis:</b> \${esc(item.claim_type||'-')}</div><div><b>Durasi:</b> \${esc(item.duration||'-')}</div>\${item.admin_note?\`<div><b>Catatan admin:</b> \${esc(item.admin_note)}</div>\`:''}<div><b>Diperbarui:</b> \${esc(item.updated_at?new Date(item.updated_at).toLocaleString('id-ID'):'-')}</div></div></article>\`}).join('');
+  }catch(error){notice(statusNotice,error?.message||'Tidak dapat terhubung ke server.')}
+  finally{loading(button,false,'Cari Status')}
+});
+</script>
+</body>
+</html>
+`;
+
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (url.pathname !== "/" && url.pathname !== "/index.html") {
+      return new Response("Not Found", { status: 404 });
+    }
+    return new Response(HTML, {
+      headers: {
+        "Content-Type": "text/html; charset=UTF-8",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Pragma": "no-cache"
+      }
+    });
+  }
+};
