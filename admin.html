@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Garansi JuaStore</title><style>
+body{margin:0;background:#0d0d0f;color:#fff;font-family:system-ui,sans-serif}.wrap{width:min(1100px,calc(100% - 22px));margin:22px auto}
+.card{background:#17171b;border:1px solid #303038;border-radius:18px;padding:18px;margin-bottom:15px}input,select,textarea,button{font:inherit}
+input,select,textarea{background:#222228;color:#fff;border:1px solid #383840;border-radius:10px;padding:11px}button{border:0;border-radius:10px;padding:10px 13px;font-weight:800;cursor:pointer}
+.top{display:flex;gap:9px;flex-wrap:wrap}.top input{flex:1;min-width:220px}.claim{display:grid;gap:10px}.meta{color:#aaa;font-size:14px;line-height:1.6}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.accept{background:#5ad096}.process{background:#f2c45d}.reject{background:#ff7777}.wait{background:#ddd}
+textarea{width:100%;min-height:70px;box-sizing:border-box}.badge{display:inline-block;padding:6px 9px;border-radius:999px;background:#303038;font-size:12px}
+</style></head><body><div class="wrap">
+<div class="card"><h1>Admin Garansi JuaStore</h1><div class="top"><input id="api" value="https://juastore-garansi-worker.jhonyoga01.workers.dev"><input id="key" type="password" placeholder="ADMIN_KEY"><button onclick="load()">Muat Data</button></div></div>
+<div id="list"></div></div>
+<script>
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+async function load(){localStorage.adminKey=key.value;list.innerHTML='<div class="card">Memuat...</div>';try{const r=await fetch(api.value+'/api/admin/claims',{headers:{'X-Admin-Key':key.value}});const j=await r.json();if(!r.ok)throw Error(j.message);list.innerHTML=j.data.map(c=>`<div class="card claim"><div><b>${esc(c.product_name)}</b> <span class="badge">${esc(c.status)}</span></div><div class="meta">ID: ${esc(c.order_id)}<br>Nama: ${esc(c.customer_name)} — WA: ${esc(c.whatsapp)}<br>Jenis: ${esc(c.claim_type)} — Order: ${esc(c.order_date)}<br>Kendala: ${esc(c.problem)}</div><textarea id="n-${c.id}" placeholder="Catatan admin">${esc(c.admin_note||"")}</textarea><div class="actions"><button class="accept" onclick="setStatus('${c.id}','DITERIMA')">✅ Terima</button><button class="process" onclick="setStatus('${c.id}','DIPROSES')">⏳ Proses</button><button class="reject" onclick="setStatus('${c.id}','DITOLAK')">❌ Tolak</button><button class="wait" onclick="setStatus('${c.id}','MENUNGGU')">↩ Menunggu</button></div></div>`).join('')||'<div class="card">Belum ada klaim.</div>'}catch(e){list.innerHTML='<div class="card">'+esc(e.message)+'</div>'}}
+async function setStatus(id,status){try{const r=await fetch(api.value+'/api/admin/status',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Key':key.value},body:JSON.stringify({id,status,adminNote:document.getElementById('n-'+id).value})});const j=await r.json();if(!r.ok)throw Error(j.message);await load()}catch(e){alert(e.message)}}
+key.value=localStorage.adminKey||"";
+</script></body></html>
