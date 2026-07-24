@@ -51,6 +51,19 @@ f.onsubmit=async e=>{e.preventDefault();if(!f.checkValidity()){f.reportValidity(
 const fd=new FormData();ids.forEach(id=>fd.append(id,document.getElementById(id).value.trim()));fd.append("evidence",a);fd.append("orderProof",b);send.disabled=true;send.textContent="Mengirim...";show(msg,"","Mengirim klaim...");
 try{const r=await fetch(API+"/api/claims",{method:"POST",body:fd});const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Klaim gagal dikirim.");show(msg,"ok","Klaim berhasil. Simpan ID order: "+document.getElementById("orderId").value.trim());document.getElementById("problem").value="";evidence.value="";orderProof.value=""}catch(x){show(msg,"err",x.message)}finally{send.disabled=false;send.textContent="Kirim Klaim"}};
 const sf=document.getElementById("sf"),sm=document.getElementById("sm"),out=document.getElementById("out"),q=document.getElementById("q");
-sf.onsubmit=async e=>{e.preventDefault();show(sm,"","Mencari...");out.innerHTML="";try{const r=await fetch(API+"/api/status?q="+encodeURIComponent(q.value.trim()));const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Tidak ditemukan");sm.className="notice";const d=j.data;out.innerHTML='<div class="result"><b>'+esc(d.product_name)+'</b><p>ID: '+esc(d.order_id)+'</p><p>Status: <b>'+esc(d.status)+'</b></p><p>Catatan admin: '+esc(d.admin_note||"-")+'</p></div>'}catch(x){show(sm,"err",x.message)}};
+sf.onsubmit=async e=>{e.preventDefault();show(sm,"","Mencari...");out.innerHTML="";try{const r=await fetch(API+"/api/status?q="+encodeURIComponent(q.value.trim()));const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Tidak ditemukan");sm.className="notice";const d=j.data?.claim || j.data || j;
+
+const productName=d.product_name || d.productName || "-";
+const orderId=d.order_id || d.orderId || d.id || "-";
+const status=d.status || "MENUNGGU";
+const adminNote=d.admin_note || d.adminNote || "-";
+
+out.innerHTML=
+'<div class="result">'+
+'<b>'+esc(productName)+'</b>'+
+'<p>ID: '+esc(orderId)+'</p>'+
+'<p>Status: <b>'+esc(status)+'</b></p>'+
+'<p>Catatan admin: '+esc(adminNote)+'</p>'+
+'</div>';'}catch(x){show(sm,"err",x.message)}};
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 </script></body></html>
