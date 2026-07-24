@@ -41,29 +41,180 @@ input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;pad
 <h2>Cek Status</h2><form id="sf"><input id="q" required placeholder="ID order atau WhatsApp"><button class="btn" type="submit">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
 </section>
 </main>
-<script>
-const API="https://juastore-garansi-worker.jhonyoga01.workers.dev";
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab,.panel").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById(b.dataset.p).classList.add("active")});
-const ids=["customerName","customerContact","productName","price","duration","orderDate","orderId","payment","claimType","problem"];
-const show=(el,t,m)=>{el.className="notice show "+t;el.textContent=m};
-const f=document.getElementById("f"),send=document.getElementById("send"),msg=document.getElementById("msg"),evidence=document.getElementById("evidence"),orderProof=document.getElementById("orderProof");
-f.onsubmit=async e=>{e.preventDefault();if(!f.checkValidity()){f.reportValidity();return}const a=evidence.files[0],b=orderProof.files[0];if(!a||!b){show(msg,"err","Foto error dan bukti pembelian wajib diunggah.");return}const allowed=["image/jpeg","image/png","image/webp"];for(const file of[a,b]){if(!allowed.includes(file.type)){show(msg,"err","Format foto harus JPG, PNG, atau WEBP.");return}if(file.size>5*1024*1024){show(msg,"err","Ukuran setiap foto maksimal 5 MB.");return}}
-const fd=new FormData();ids.forEach(id=>fd.append(id,document.getElementById(id).value.trim()));fd.append("evidence",a);fd.append("orderProof",b);send.disabled=true;send.textContent="Mengirim...";show(msg,"","Mengirim klaim...");
-try{const r=await fetch(API+"/api/claims",{method:"POST",body:fd});const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Klaim gagal dikirim.");show(msg,"ok","Klaim berhasil. Simpan ID order: "+document.getElementById("orderId").value.trim());document.getElementById("problem").value="";evidence.value="";orderProof.value=""}catch(x){show(msg,"err",x.message)}finally{send.disabled=false;send.textContent="Kirim Klaim"}};
-const sf=document.getElementById("sf"),sm=document.getElementById("sm"),out=document.getElementById("out"),q=document.getElementById("q");
-sf.onsubmit=async e=>{e.preventDefault();show(sm,"","Mencari...");out.innerHTML="";try{const r=await fetch(API+"/api/status?q="+encodeURIComponent(q.value.trim()));const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Tidak ditemukan");sm.className="notice";const d=j.data?.claim || j.data || j;
+</body>
+  <script>
+const API = "https://juastore-garansi-worker.jhonyoga01.workers.dev";
 
-const productName=d.product_name || d.productName || "-";
-const orderId=d.order_id || d.orderId || d.id || "-";
-const status=d.status || "MENUNGGU";
-const adminNote=d.admin_note || d.adminNote || "-";
+document.querySelectorAll(".tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((item) => {
+      item.classList.remove("active");
+    });
 
-out.innerHTML=
-'<div class="result">'+
-'<b>'+esc(productName)+'</b>'+
-'<p>ID: '+esc(orderId)+'</p>'+
-'<p>Status: <b>'+esc(status)+'</b></p>'+
-'<p>Catatan admin: '+esc(adminNote)+'</p>'+
-'</div>';'}catch(x){show(sm,"err",x.message)}};
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-</script></body></html>
+    document.querySelectorAll(".panel").forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    button.classList.add("active");
+    document.getElementById(button.dataset.p).classList.add("active");
+  });
+});
+
+const ids = [
+  "customerName",
+  "customerContact",
+  "productName",
+  "price",
+  "duration",
+  "orderDate",
+  "orderId",
+  "payment",
+  "claimType",
+  "problem"
+];
+
+function show(element, type, message) {
+  element.className = "notice show " + type;
+  element.textContent = message;
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
+
+const form = document.getElementById("f");
+const send = document.getElementById("send");
+const msg = document.getElementById("msg");
+const evidence = document.getElementById("evidence");
+const orderProof = document.getElementById("orderProof");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  const errorPhoto = evidence.files[0];
+  const purchasePhoto = orderProof.files[0];
+
+  if (!errorPhoto || !purchasePhoto) {
+    show(msg, "err", "Foto error dan bukti pembelian wajib diunggah.");
+    return;
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  for (const file of [errorPhoto, purchasePhoto]) {
+    if (!allowedTypes.includes(file.type)) {
+      show(msg, "err", "Format foto harus JPG, PNG, atau WEBP.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      show(msg, "err", "Ukuran setiap foto maksimal 5 MB.");
+      return;
+    }
+  }
+
+  const formData = new FormData();
+
+  ids.forEach((id) => {
+    formData.append(id, document.getElementById(id).value.trim());
+  });
+
+  formData.append("evidence", errorPhoto);
+  formData.append("orderProof", purchasePhoto);
+
+  send.disabled = true;
+  send.textContent = "Mengirim...";
+  show(msg, "", "Mengirim klaim...");
+
+  try {
+    const response = await fetch(API + "/api/claims", {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Klaim gagal dikirim.");
+    }
+
+    show(
+      msg,
+      "ok",
+      "Klaim berhasil. Simpan ID order: " +
+      document.getElementById("orderId").value.trim()
+    );
+
+    document.getElementById("problem").value = "";
+    evidence.value = "";
+    orderProof.value = "";
+  } catch (error) {
+    show(msg, "err", error.message);
+  } finally {
+    send.disabled = false;
+    send.textContent = "Kirim Klaim";
+  }
+});
+
+const statusForm = document.getElementById("sf");
+const statusMessage = document.getElementById("sm");
+const output = document.getElementById("out");
+const query = document.getElementById("q");
+
+statusForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  show(statusMessage, "", "Mencari...");
+  output.innerHTML = "";
+
+  try {
+    const response = await fetch(
+      API + "/api/status?q=" + encodeURIComponent(query.value.trim())
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Data tidak ditemukan.");
+    }
+
+    statusMessage.className = "notice";
+
+    const data = result.data?.claim || result.data || result;
+
+    const productName =
+      data.product_name || data.productName || "-";
+
+    const orderId =
+      data.order_id || data.orderId || data.id || "-";
+
+    const status =
+      data.status || "MENUNGGU";
+
+    const adminNote =
+      data.admin_note || data.adminNote || "-";
+
+    output.innerHTML = `
+      <div class="result">
+        <b>${esc(productName)}</b>
+        <p>ID: ${esc(orderId)}</p>
+        <p>Status: <b>${esc(status)}</b></p>
+        <p>Catatan admin: ${esc(adminNote)}</p>
+      </div>
+    `;
+  } catch (error) {
+    show(statusMessage, "err", error.message);
+  }
+});
+  </script></html>
