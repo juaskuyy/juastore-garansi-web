@@ -10,10 +10,10 @@ main{width:min(920px,calc(100% - 24px));margin:24px auto}.hero,.card{border:1px 
 .hero{margin-bottom:18px}h1,h2{margin:0 0 8px}.muted{color:var(--muted);line-height:1.6}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
 label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#202026;color:#fff}
-textarea{min-height:110px}.btn{margin-top:16px;padding:13px 18px;border:0;border-radius:12px;font-weight:800;cursor:pointer}
+input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;padding:13px 18px;border:0;border-radius:12px;font-weight:800;cursor:pointer}
 .notice{display:none;margin-top:14px;padding:13px;border-radius:12px;background:#202026}.notice.show{display:block}.ok{color:#b8f0d1}.err{color:#ffc1c1}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#17171b;color:#aaa;cursor:pointer}.tab.active{background:#eee;color:#111}
-.panel{display:none}.panel.active{display:block}.result{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#202026}
+.panel{display:none}.panel.active{display:block}.result{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#202026}.help{margin-top:7px;font-size:13px}
 @media(max-width:700px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -32,51 +32,25 @@ textarea{min-height:110px}.btn{margin-top:16px;padding:13px 18px;border:0;border
 <div><label>ID order *</label><input id="orderId" required></div>
 <div><label>Pembayaran</label><select id="payment"><option value="">Pilih</option><option>DANA</option><option>GoPay</option><option>QRIS</option></select></div>
 <div class="full"><label>Jenis *</label><select id="claimType" required><option value="">Pilih</option><option>Garansi</option><option>Refund</option></select></div>
-<div class="full">
-  <label>Kendala *</label>
-  <textarea id="problem" required></textarea>
-</div>
-
-<div class="full">
-  <label>Foto Kendala / Error *</label>
-  <input
-    id="evidence"
-    name="evidence"
-    type="file"
-    accept="image/*"
-    required
-  >
-  <div class="muted" style="margin-top:7px;font-size:13px">
-    Upload screenshot atau foto yang menunjukkan kendala/error.
-  </div>
-</div>
-
-<div class="full">
-  <label>Bukti Pembelian *</label>
-  <input
-    id="orderProof"
-    name="orderProof"
-    type="file"
-    accept="image/*"
-    required
-  >
-  <div class="muted" style="margin-top:7px;font-size:13px">
-    Upload screenshot bukti order/chat/invoice untuk verifikasi.
-  </div>
-</div>
-</div><button class="btn" id="send">Kirim Klaim</button><div id="msg" class="notice"></div></form>
+<div class="full"><label>Kendala *</label><textarea id="problem" required></textarea></div>
+<div class="full"><label>Foto Kendala / Error *</label><input id="evidence" name="evidence" type="file" accept=".jpg,.jpeg,.png,.webp" required><div class="muted help">Upload screenshot atau foto yang menunjukkan kendala/error. Maksimal 5 MB.</div></div>
+<div class="full"><label>Bukti Pembelian *</label><input id="orderProof" name="orderProof" type="file" accept=".jpg,.jpeg,.png,.webp" required><div class="muted help">Upload screenshot order, chat, atau invoice untuk verifikasi. Maksimal 5 MB.</div></div>
+</div><button class="btn" id="send" type="submit">Kirim Klaim</button><div id="msg" class="notice"></div></form>
 </section>
 <section id="status" class="panel card">
-<h2>Cek Status</h2><form id="sf"><input id="q" required placeholder="ID order atau WhatsApp"><button class="btn">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
+<h2>Cek Status</h2><form id="sf"><input id="q" required placeholder="ID order atau WhatsApp"><button class="btn" type="submit">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
 </section>
 </main>
 <script>
 const API="https://juastore-garansi-worker.jhonyoga01.workers.dev";
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab,.panel").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById(b.dataset.p).classList.add("active")});
-const ids=["customerName","customerContact","productName","price","duration","orderDate","orderId","payment","claimType","problem","evidence"];
+const ids=["customerName","customerContact","productName","price","duration","orderDate","orderId","payment","claimType","problem"];
 const show=(el,t,m)=>{el.className="notice show "+t;el.textContent=m};
-f.onsubmit=async e=>{e.preventDefault();if(!f.checkValidity()){f.reportValidity();return}const body={};ids.forEach(id=>body[id]=document.getElementById(id).value.trim());send.disabled=true;show(msg,"","Mengirim...");
-try{const r=await fetch(API+"/api/claims",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Gagal");show(msg,"ok","Klaim berhasil. Simpan ID order: "+body.orderId);problem.value="";evidence.value=""}catch(x){show(msg,"err",x.message)}finally{send.disabled=false}};
+const f=document.getElementById("f"),send=document.getElementById("send"),msg=document.getElementById("msg"),evidence=document.getElementById("evidence"),orderProof=document.getElementById("orderProof");
+f.onsubmit=async e=>{e.preventDefault();if(!f.checkValidity()){f.reportValidity();return}const a=evidence.files[0],b=orderProof.files[0];if(!a||!b){show(msg,"err","Foto error dan bukti pembelian wajib diunggah.");return}const allowed=["image/jpeg","image/png","image/webp"];for(const file of[a,b]){if(!allowed.includes(file.type)){show(msg,"err","Format foto harus JPG, PNG, atau WEBP.");return}if(file.size>5*1024*1024){show(msg,"err","Ukuran setiap foto maksimal 5 MB.");return}}
+const fd=new FormData();ids.forEach(id=>fd.append(id,document.getElementById(id).value.trim()));fd.append("evidence",a);fd.append("orderProof",b);send.disabled=true;send.textContent="Mengirim...";show(msg,"","Mengirim klaim...");
+try{const r=await fetch(API+"/api/claims",{method:"POST",body:fd});const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Klaim gagal dikirim.");show(msg,"ok","Klaim berhasil. Simpan ID order: "+document.getElementById("orderId").value.trim());document.getElementById("problem").value="";evidence.value="";orderProof.value=""}catch(x){show(msg,"err",x.message)}finally{send.disabled=false;send.textContent="Kirim Klaim"}};
+const sf=document.getElementById("sf"),sm=document.getElementById("sm"),out=document.getElementById("out"),q=document.getElementById("q");
 sf.onsubmit=async e=>{e.preventDefault();show(sm,"","Mencari...");out.innerHTML="";try{const r=await fetch(API+"/api/status?q="+encodeURIComponent(q.value.trim()));const j=await r.json();if(!r.ok||!j.success)throw Error(j.message||"Tidak ditemukan");sm.className="notice";const d=j.data;out.innerHTML='<div class="result"><b>'+esc(d.product_name)+'</b><p>ID: '+esc(d.order_id)+'</p><p>Status: <b>'+esc(d.status)+'</b></p><p>Catatan admin: '+esc(d.admin_note||"-")+'</p></div>'}catch(x){show(sm,"err",x.message)}};
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 </script></body></html>
