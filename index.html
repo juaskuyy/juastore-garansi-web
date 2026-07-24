@@ -32,8 +32,38 @@ textarea{min-height:110px}.btn{margin-top:16px;padding:13px 18px;border:0;border
 <div><label>ID order *</label><input id="orderId" required></div>
 <div><label>Pembayaran</label><select id="payment"><option value="">Pilih</option><option>DANA</option><option>GoPay</option><option>QRIS</option></select></div>
 <div class="full"><label>Jenis *</label><select id="claimType" required><option value="">Pilih</option><option>Garansi</option><option>Refund</option></select></div>
-<div class="full"><label>Kendala *</label><textarea id="problem" required></textarea></div>
-<div class="full"><label>Link bukti</label><input id="evidence" type="url"></div>
+<div class="full">
+  <label>Kendala *</label>
+  <textarea id="problem" required></textarea>
+</div>
+
+<div class="full">
+  <label>Foto Kendala / Error *</label>
+  <input
+    id="evidence"
+    name="evidence"
+    type="file"
+    accept="image/*"
+    required
+  >
+  <div class="muted" style="margin-top:7px;font-size:13px">
+    Upload screenshot atau foto yang menunjukkan kendala/error.
+  </div>
+</div>
+
+<div class="full">
+  <label>Bukti Pembelian *</label>
+  <input
+    id="orderProof"
+    name="orderProof"
+    type="file"
+    accept="image/*"
+    required
+  >
+  <div class="muted" style="margin-top:7px;font-size:13px">
+    Upload screenshot bukti order/chat/invoice untuk verifikasi.
+  </div>
+</div>
 </div><button class="btn" id="send">Kirim Klaim</button><div id="msg" class="notice"></div></form>
 </section>
 <section id="status" class="panel card">
