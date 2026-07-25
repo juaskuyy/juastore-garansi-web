@@ -95,6 +95,7 @@ const msg = document.getElementById("msg");
 const evidence = document.getElementById("evidence");
 
 form.addEventListener("submit", async (event) => {
+  console.log("Submit diklik");
   event.preventDefault();
 
   if (!form.checkValidity()) {
