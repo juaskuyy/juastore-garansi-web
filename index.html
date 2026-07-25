@@ -43,7 +43,6 @@ input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;pad
 </section>
 </main>
   <script>
-    alert("VERSI BARU MASUK");
     console.log("1");
 
 const form = document.getElementById("f");
@@ -155,36 +154,149 @@ form.addEventListener("submit", async (event) => {
   let result;
 
   try {
-    result = JSON.parse(responseText);
-  } catch {
-    throw new Error(
-      "Respons server tidak valid: " +
-      (responseText || "respons kosong")
-    );
+<script>
+const API = "https://juastore-garansi-worker.jhonyoga01.workers.dev";
+
+document.querySelectorAll(".tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    document.querySelectorAll(".panel").forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    const targetPanel = document.getElementById(button.dataset.p);
+
+    if (targetPanel) {
+      targetPanel.classList.add("active");
+    }
+  });
+});
+
+const ids = [
+  "customerName",
+  "customerContact",
+  "productName",
+  "price",
+  "duration",
+  "orderDate",
+  "orderId",
+  "payment",
+  "claimType",
+  "problem"
+];
+
+function show(element, type, message) {
+  element.className = "notice show " + type;
+  element.textContent = message;
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
+
+const form = document.getElementById("f");
+const send = document.getElementById("send");
+const msg = document.getElementById("msg");
+const evidence = document.getElementById("evidence");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
   }
 
-  if (!response.ok || !result.success) {
-    throw new Error(
-      result.message || "Klaim gagal dikirim."
-    );
+  const errorPhoto = evidence.files[0];
+
+  if (!errorPhoto) {
+    show(msg, "err", "Foto kendala wajib diunggah.");
+    return;
   }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!allowedTypes.includes(errorPhoto.type)) {
+    show(msg, "err", "Format foto harus JPG, PNG, atau WEBP.");
+    return;
+  }
+
+  if (errorPhoto.size > 5 * 1024 * 1024) {
+    show(msg, "err", "Ukuran foto maksimal 5 MB.");
+    return;
+  }
+
+  const formData = new FormData();
+
+  ids.forEach((id) => {
+    const element = document.getElementById(id);
+    formData.append(id, element.value.trim());
+  });
+
+  formData.append("evidence", errorPhoto);
+
+  send.disabled = true;
+  send.textContent = "Mengirim...";
+  show(msg, "", "Mengirim klaim...");
+
+  try {
+    const response = await fetch(API + "/api/claims", {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await response.text();
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Respons server tidak valid.");
+    }
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message || "Klaim gagal dikirim."
+      );
+    }
 
     const kodeGaransi =
-  result.data?.id ||
-  result.id ||
-  result.claimId ||
-  "-";
+      result.data?.id ||
+      result.id ||
+      result.claimId ||
+      "-";
 
-show(
-  msg,
-  "ok",
-  "Klaim berhasil. Simpan kode garansi: " + kodeGaransi
-);
+    show(
+      msg,
+      "ok",
+      "Klaim berhasil. Simpan kode garansi: " + kodeGaransi
+    );
 
-    document.getElementById("problem").value = "";
-    evidence.value = "";
+    form.reset();
   } catch (error) {
-    show(msg, "err", error.message);
+    console.error(error);
+
+    show(
+      msg,
+      "err",
+      error.message || "Gagal mengirim klaim."
+    );
   } finally {
     send.disabled = false;
     send.textContent = "Kirim Klaim";
@@ -199,36 +311,58 @@ const query = document.getElementById("q");
 statusForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  const searchValue = query.value.trim();
+
+  if (!searchValue) {
+    show(
+      statusMessage,
+      "err",
+      "Masukkan ID order atau nomor WhatsApp."
+    );
+    return;
+  }
+
   show(statusMessage, "", "Mencari...");
   output.innerHTML = "";
 
   try {
     const response = await fetch(
-      API + "/api/status?q=" + encodeURIComponent(query.value.trim())
+      API + "/api/status?q=" +
+      encodeURIComponent(searchValue)
     );
 
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "Data tidak ditemukan.");
+      throw new Error(
+        result.message || "Data tidak ditemukan."
+      );
     }
 
     statusMessage.className = "notice";
 
-    const raw = result.data?.claim || result.data || result;
-const data = Array.isArray(raw) ? raw[0] : raw;
+    const raw =
+      result.data?.claim ||
+      result.data ||
+      result;
+
+    const data = Array.isArray(raw) ? raw[0] : raw;
 
     const productName =
-      data.product_name || data.productName || "-";
+      data.product_name ||
+      data.productName ||
+      "-";
 
     const warrantyCode =
-  data.id || "-";
+      data.id || "-";
 
     const status =
       data.status || "MENUNGGU";
 
     const adminNote =
-      data.admin_note || data.adminNote || "-";
+      data.admin_note ||
+      data.adminNote ||
+      "-";
 
     output.innerHTML = `
       <div class="result">
@@ -239,9 +373,14 @@ const data = Array.isArray(raw) ? raw[0] : raw;
       </div>
     `;
   } catch (error) {
-    show(statusMessage, "err", error.message);
+    show(
+      statusMessage,
+      "err",
+      error.message || "Gagal memeriksa status."
+    );
   }
 });
-  </script>
+</script>
+  
 </body>
 </html>
