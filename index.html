@@ -191,7 +191,8 @@ statusForm.addEventListener("submit", async (event) => {
 
     statusMessage.className = "notice";
 
-    const data = result.data?.claim || result.data || result;
+    const raw = result.data?.claim || result.data || result;
+const data = Array.isArray(raw) ? raw[0] : raw;
 
     const productName =
       data.product_name || data.productName || "-";
