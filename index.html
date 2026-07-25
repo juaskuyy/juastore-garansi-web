@@ -149,7 +149,17 @@ form.addEventListener("submit", async (event) => {
       throw new Error(result.message || "Klaim gagal dikirim.");
     }
 
-    show(msg, "ok", "Klaim berhasil. Simpan kode garansi: " + result.data.id);
+    const kodeGaransi =
+  result.data?.id ||
+  result.id ||
+  result.claimId ||
+  "-";
+
+show(
+  msg,
+  "ok",
+  "Klaim berhasil. Simpan kode garansi: " + kodeGaransi
+);
 
     document.getElementById("problem").value = "";
     evidence.value = "";
