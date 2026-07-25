@@ -42,7 +42,6 @@ input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;pad
   <input id="q" required placeholder="Masukkan ID order atau nomor WhatsApp"><button class="btn" type="submit">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
 </section>
 </main>
-</body>
   <script>
 const API = "https://juastore-garansi-worker.jhonyoga01.workers.dev";
 
@@ -137,16 +136,29 @@ form.addEventListener("submit", async (event) => {
   show(msg, "", "Mengirim klaim...");
 
   try {
-    const response = await fetch(API + "/api/claims", {
-      method: "POST",
-      body: formData
-    });
+  const response = await fetch(API + "/api/claims", {
+    method: "POST",
+    body: formData
+  });
 
-    const result = await response.json();
+  const responseText = await response.text();
 
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "Klaim gagal dikirim.");
-    }
+  let result;
+
+  try {
+    result = JSON.parse(responseText);
+  } catch {
+    throw new Error(
+      "Respons server tidak valid: " +
+      (responseText || "respons kosong")
+    );
+  }
+
+  if (!response.ok || !result.success) {
+    throw new Error(
+      result.message || "Klaim gagal dikirim."
+    );
+  }
 
     const kodeGaransi =
   result.data?.id ||
@@ -221,4 +233,6 @@ const data = Array.isArray(raw) ? raw[0] : raw;
     show(statusMessage, "err", error.message);
   }
 });
-  </script></html>
+  </script>
+</body>
+</html>
