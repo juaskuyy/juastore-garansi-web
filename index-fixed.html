@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JuaStore Garansi</title>
+<style>
+:root{--bg:#0d0d0f;--card:#17171b;--line:#303038;--text:#f5f5f7;--muted:#aaaab4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+main{width:min(920px,calc(100% - 24px));margin:24px auto}.hero,.card{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:22px}
+.hero{margin-bottom:18px}h1,h2{margin:0 0 8px}.muted{color:var(--muted);line-height:1.6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#202026;color:#fff}
+input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;padding:13px 18px;border:0;border-radius:12px;font-weight:800;cursor:pointer}
+.notice{display:none;margin-top:14px;padding:13px;border-radius:12px;background:#202026}.notice.show{display:block}.ok{color:#b8f0d1}.err{color:#ffc1c1}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#17171b;color:#aaa;cursor:pointer}.tab.active{background:#eee;color:#111}
+.panel{display:none}.panel.active{display:block}.result{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#202026}.help{margin-top:7px;font-size:13px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<section class="hero"><h1>JuaStore Garansi & Refund</h1><div class="muted">Isi data dengan lengkap agar klaim cepat diproses.</div></section>
+<div class="tabs"><button class="tab active" data-p="claim">Ajukan Klaim</button><button class="tab" data-p="status">Cek Status</button></div>
+<section id="claim" class="panel active card">
+<h2>Form Klaim</h2>
+<form id="f"><div class="grid">
+<div><label>Nama *</label><input id="customerName" required></div>
+<div><label>WhatsApp *</label><input id="customerContact" required placeholder="628..."></div>
+<div><label>Produk *</label><input id="productName" required></div>
+<div><label>Harga</label><input id="price"></div>
+<div><label>Durasi *</label><input id="duration" required></div>
+<div><label>Tanggal order *</label><input id="orderDate" type="date" required></div>
+<div><label>ID order *</label><input id="orderId" required></div>
+<div><label>Pembayaran</label><select id="payment"><option value="">Pilih</option><option>DANA</option><option>GoPay</option><option>QRIS</option></select></div>
+<div class="full"><label>Jenis *</label><select id="claimType" required><option value="">Pilih</option><option>Garansi</option><option>Refund</option></select></div>
+<div class="full"><label>Kendala *</label><textarea id="problem" required></textarea></div>
+<div class="full"><label>Foto Kendala / Error *</label><input id="evidence" name="evidence" type="file" accept=".jpg,.jpeg,.png,.webp" required><div class="muted help">Upload screenshot atau foto yang menunjukkan kendala/error. Maksimal 5 MB.</div></div>
+</div><button class="btn" id="send" type="submit">Kirim Klaim</button><div id="msg" class="notice"></div></form>
+</section>
+<section id="status" class="panel card">
+<h2>Cek Status</h2>
+<form id="sf">
+  <input id="q" required placeholder="Masukkan ID order atau nomor WhatsApp"><button class="btn" type="submit">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
+</section>
+</main>
+
+<script>
+const API = "https://juastore-garansi-worker.jhonyoga01.workers.dev";
+
+document.querySelectorAll(".tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    document.querySelectorAll(".panel").forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    const targetPanel = document.getElementById(button.dataset.p);
+
+    if (targetPanel) {
+      targetPanel.classList.add("active");
+    }
+  });
+});
+
+const ids = [
+  "customerName",
+  "customerContact",
+  "productName",
+  "price",
+  "duration",
+  "orderDate",
+  "orderId",
+  "payment",
+  "claimType",
+  "problem"
+];
+
+function show(element, type, message) {
+  element.className = "notice show " + type;
+  element.textContent = message;
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
+}
+
+const form = document.getElementById("f");
+const send = document.getElementById("send");
+const msg = document.getElementById("msg");
+const evidence = document.getElementById("evidence");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  const errorPhoto = evidence.files[0];
+
+  if (!errorPhoto) {
+    show(msg, "err", "Foto kendala wajib diunggah.");
+    return;
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!allowedTypes.includes(errorPhoto.type)) {
+    show(msg, "err", "Format foto harus JPG, PNG, atau WEBP.");
+    return;
+  }
+
+  if (errorPhoto.size > 5 * 1024 * 1024) {
+    show(msg, "err", "Ukuran foto maksimal 5 MB.");
+    return;
+  }
+
+  const formData = new FormData();
+
+  ids.forEach((id) => {
+    const element = document.getElementById(id);
+    formData.append(id, element.value.trim());
+  });
+
+  formData.append("evidence", errorPhoto);
+
+  send.disabled = true;
+  send.textContent = "Mengirim...";
+  show(msg, "", "Mengirim klaim...");
+
+  try {
+    const response = await fetch(API + "/api/claims", {
+      method: "POST",
+      body: formData
+    });
+
+    const text = await response.text();
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      throw new Error("Respons server tidak valid.");
+    }
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message || "Klaim gagal dikirim."
+      );
+    }
+
+    const kodeGaransi =
+      result.data?.id ||
+      result.id ||
+      result.claimId ||
+      "-";
+
+    show(
+      msg,
+      "ok",
+      "Klaim berhasil. Simpan kode garansi: " + kodeGaransi
+    );
+
+    form.reset();
+  } catch (error) {
+    console.error(error);
+
+    show(
+      msg,
+      "err",
+      error.message || "Gagal mengirim klaim."
+    );
+  } finally {
+    send.disabled = false;
+    send.textContent = "Kirim Klaim";
+  }
+});
+
+const statusForm = document.getElementById("sf");
+const statusMessage = document.getElementById("sm");
+const output = document.getElementById("out");
+const query = document.getElementById("q");
+
+statusForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const searchValue = query.value.trim();
+
+  if (!searchValue) {
+    show(
+      statusMessage,
+      "err",
+      "Masukkan ID order atau nomor WhatsApp."
+    );
+    return;
+  }
+
+  show(statusMessage, "", "Mencari...");
+  output.innerHTML = "";
+
+  try {
+    const response = await fetch(
+      API + "/api/status?q=" +
+      encodeURIComponent(searchValue)
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message || "Data tidak ditemukan."
+      );
+    }
+
+    statusMessage.className = "notice";
+
+    const raw =
+      result.data?.claim ||
+      result.data ||
+      result;
+
+    const data = Array.isArray(raw) ? raw[0] : raw;
+
+    const productName =
+      data.product_name ||
+      data.productName ||
+      "-";
+
+    const warrantyCode =
+      data.id || "-";
+
+    const status =
+      data.status || "MENUNGGU";
+
+    const adminNote =
+      data.admin_note ||
+      data.adminNote ||
+      "-";
+
+    output.innerHTML = `
+      <div class="result">
+        <b>${esc(productName)}</b>
+        <p>Kode Garansi: ${esc(warrantyCode)}</p>
+        <p>Status: <b>${esc(status)}</b></p>
+        <p>Catatan admin: ${esc(adminNote)}</p>
+      </div>
+    `;
+  } catch (error) {
+    show(
+      statusMessage,
+      "err",
+      error.message || "Gagal memeriksa status."
+    );
+  }
+});
+</script>
+  
+</body>
+</html>
