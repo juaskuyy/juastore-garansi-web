@@ -34,7 +34,6 @@ input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;pad
 <div class="full"><label>Jenis *</label><select id="claimType" required><option value="">Pilih</option><option>Garansi</option><option>Refund</option></select></div>
 <div class="full"><label>Kendala *</label><textarea id="problem" required></textarea></div>
 <div class="full"><label>Foto Kendala / Error *</label><input id="evidence" name="evidence" type="file" accept=".jpg,.jpeg,.png,.webp" required><div class="muted help">Upload screenshot atau foto yang menunjukkan kendala/error. Maksimal 5 MB.</div></div>
-<div class="full"><label>Bukti Pembelian *</label><input id="orderProof" name="orderProof" type="file" accept=".jpg,.jpeg,.png,.webp" required><div class="muted help">Upload screenshot order, chat, atau invoice untuk verifikasi. Maksimal 5 MB.</div></div>
 </div><button class="btn" id="send" type="submit">Kirim Klaim</button><div id="msg" class="notice"></div></form>
 </section>
 <section id="status" class="panel card">
@@ -92,7 +91,6 @@ const form = document.getElementById("f");
 const send = document.getElementById("send");
 const msg = document.getElementById("msg");
 const evidence = document.getElementById("evidence");
-const orderProof = document.getElementById("orderProof");
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -103,16 +101,15 @@ form.addEventListener("submit", async (event) => {
   }
 
   const errorPhoto = evidence.files[0];
-  const purchasePhoto = orderProof.files[0];
 
   if (!errorPhoto || !purchasePhoto) {
-    show(msg, "err", "Foto error dan bukti pembelian wajib diunggah.");
+    show(msg, "err", "Foto kendala wajib diunggah.");
     return;
   }
 
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-  for (const file of [errorPhoto, purchasePhoto]) {
+  for (const file of [errorPhoto]) {
     if (!allowedTypes.includes(file.type)) {
       show(msg, "err", "Format foto harus JPG, PNG, atau WEBP.");
       return;
@@ -131,7 +128,6 @@ form.addEventListener("submit", async (event) => {
   });
 
   formData.append("evidence", errorPhoto);
-  formData.append("orderProof", purchasePhoto);
 
   send.disabled = true;
   send.textContent = "Mengirim...";
@@ -163,7 +159,6 @@ show(
 
     document.getElementById("problem").value = "";
     evidence.value = "";
-    orderProof.value = "";
   } catch (error) {
     show(msg, "err", error.message);
   } finally {
