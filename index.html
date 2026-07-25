@@ -39,7 +39,7 @@ input[type=file]{padding:10px}textarea{min-height:110px}.btn{margin-top:16px;pad
 <section id="status" class="panel card">
 <h2>Cek Status</h2>
 <form id="sf">
-  <input id="q" required placeholder="Masukkan ID order atau nomor WhatsApp"><button class="btn" type="submit">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
+  <input id="q" required placeholder="Masukkan kode garansi, ID order, atau nomor WhatsApp"><button class="btn" type="submit">Cari</button></form><div id="sm" class="notice"></div><div id="out"></div>
 </section>
 </main>
 
@@ -174,7 +174,8 @@ form.addEventListener("submit", async (event) => {
     show(
       msg,
       "ok",
-      "Klaim berhasil. Simpan kode garansi: " + kodeGaransi
+      "Klaim berhasil dikirim. Kode garansi: " + kodeGaransi +
+      ". Harap simpan kode ini lalu buka menu Cek Status untuk melihat detail proses dan detail akun garansi dari admin."
     );
 
     form.reset();
@@ -206,7 +207,7 @@ statusForm.addEventListener("submit", async (event) => {
     show(
       statusMessage,
       "err",
-      "Masukkan ID order atau nomor WhatsApp."
+      "Masukkan kode garansi, ID order, atau nomor WhatsApp."
     );
     return;
   }
@@ -253,12 +254,28 @@ statusForm.addEventListener("submit", async (event) => {
       data.adminNote ||
       "-";
 
+    const adminReply =
+      data.admin_reply ||
+      data.adminReply ||
+      adminNote ||
+      "Belum ada balasan dari admin.";
+
+    const accountDetail =
+      data.account_detail ||
+      data.accountDetail ||
+      "Detail akun garansi belum tersedia.";
+
     output.innerHTML = `
       <div class="result">
         <b>${esc(productName)}</b>
-        <p>Kode Garansi: ${esc(warrantyCode)}</p>
-        <p>Status: <b>${esc(status)}</b></p>
-        <p>Catatan admin: ${esc(adminNote)}</p>
+        <p>🔐 Kode Garansi: ${esc(warrantyCode)}</p>
+        <p>📌 Status: <b>${esc(status)}</b></p>
+        <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+        <p><b>💬 Balasan Admin</b></p>
+        <div style="white-space:pre-wrap">${esc(adminReply)}</div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+        <p><b>🔑 Detail Akun Garansi</b></p>
+        <div style="white-space:pre-wrap">${esc(accountDetail)}</div>
       </div>
     `;
   } catch (error) {
