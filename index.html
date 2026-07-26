@@ -81,7 +81,7 @@ const ids = [
 
 function show(element, type, message) {
   element.className = "notice show " + type;
-  element.textContent = message;
+  element.innerHTML = message;
 }
 
 function esc(value) {
@@ -172,12 +172,39 @@ form.addEventListener("submit", async (event) => {
       "-";
 
     show(
-      msg,
-      "ok",
-      "Klaim berhasil dikirim. Kode garansi: " + kodeGaransi +
-      ". Harap simpan kode ini lalu buka menu Cek Status untuk melihat detail proses dan detail akun garansi dari admin."
-    );
+  msg,
+  "ok",
+  `
+  <h3>✅ Klaim berhasil dikirim</h3>
 
+  <p><b>Kode Garansi</b></p>
+
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0">
+    <input id="claimCode" value="${kodeGaransi}" readonly
+      style="flex:1;background:#202026;color:#fff;border:1px solid #444;padding:12px;border-radius:10px">
+
+    <button type="button" id="copyCodeBtn"
+      style="padding:12px 16px;border:0;border-radius:10px;cursor:pointer">
+      📋 Salin Kode
+    </button>
+  </div>
+
+  <small>
+    Harap simpan kode ini lalu buka menu <b>Cek Status</b> untuk melihat proses garansi.
+  </small>
+  `
+);
+
+document.getElementById("copyCodeBtn").onclick = async () => {
+  await navigator.clipboard.writeText(kodeGaransi);
+
+  const btn = document.getElementById("copyCodeBtn");
+  btn.textContent = "✅ Tersalin";
+
+  setTimeout(() => {
+    btn.textContent = "📋 Salin Kode";
+  }, 2000);
+};
     form.reset();
   } catch (error) {
     console.error(error);
